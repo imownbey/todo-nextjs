@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import classnames from "classnames";
-import { Todo, TodoUpdate } from "../todo";
+import { Todo, TodoUpdate, getTodo, listTodos } from "../todo";
 import TodoTextInput from "./todo-text-input";
+import { useRep } from "pages/layout";
+import { useSubscribe } from "replicache-react";
 
 export function TodoItem({
-  todo,
+  todo: _todo,
   onUpdate,
   onDelete,
 }: {
@@ -12,12 +14,16 @@ export function TodoItem({
   onUpdate: (update: TodoUpdate) => void;
   onDelete: () => void;
 }) {
-  const { id } = todo;
+  const { id } = _todo;
+  const rep = useRep()
   const [editing, setEditing] = useState(false);
 
   const handleDoubleClick = () => {
     setEditing(true);
   };
+
+  const todo = useSubscribe(rep, (tx) => getTodo(tx, id), { default: {completed: "UNDEFINED", text: "UNDEFINED"}, dependencies: [id] });
+  const todos = useSubscribe(rep, listTodos, { default: undefined });
 
   const handleSave = (text: string) => {
     if (text.length === 0) {
@@ -49,6 +55,8 @@ export function TodoItem({
           checked={todo.completed}
           onChange={handleToggleComplete}
         />
+        {!todos && "UNDEFINED"}
+        {todos && todos.length}
         <label onDoubleClick={handleDoubleClick}>{todo.text}</label>
         <button className="destroy" onClick={() => onDelete()} />
       </div>

@@ -9,12 +9,15 @@ import { listTodos, TodoUpdate } from "../todo";
 import Header from "./header";
 import MainSection from "./main-section";
 import "todomvc-app-css/index.css";
+import { useRep } from "pages/layout";
 
 // This is the top-level component for our app.
-const App = ({ rep }: { rep: Replicache<M> }) => {
+const App = () => {
   // Subscribe to all todos and sort them.
-  const todos = useSubscribe(rep, listTodos, { default: [] });
-  todos.sort((a, b) => a.sort - b.sort);
+  const rep = useRep()
+  console.log({rep})
+  const todos = useSubscribe(rep, listTodos, { default: undefined });
+  (todos || []) .sort((a, b) => a.sort - b.sort);
 
   // Define event handlers and connect them to Replicache mutators. Each
   // of these mutators runs immediately (optimistically) locally, then runs
@@ -49,12 +52,14 @@ const App = ({ rep }: { rep: Replicache<M> }) => {
   return (
     <div>
       <Header onNewItem={handleNewItem} />
+      {!todos && "SHOWING DEFAULT"}
+      {todos &&
       <MainSection
         todos={todos}
         onUpdateTodo={handleUpdateTodo}
         onDeleteTodos={handleDeleteTodos}
         onCompleteTodos={handleCompleteTodos}
-      />
+      />}
     </div>
   );
 };
