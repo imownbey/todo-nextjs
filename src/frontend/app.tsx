@@ -15,7 +15,6 @@ import { useRep } from "pages/layout";
 const App = () => {
   // Subscribe to all todos and sort them.
   const rep = useRep()
-  console.log({rep})
   const todos = useSubscribe(rep, listTodos, { default: undefined });
   (todos || []) .sort((a, b) => a.sort - b.sort);
 
