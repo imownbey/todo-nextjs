@@ -46,49 +46,23 @@ async function processPull(req: PullRequest, userID: string) {
 
   const t0 = Date.now();
 
-  const [entries, lastMutationIDChanges, responseCookie] = await tx(
-    async (executor) => {
-      const clientGroup = await getClientGroup(executor, req.clientGroupID);
-      if (clientGroup && clientGroup.userID !== userID) {
-        throw authError;
-      }
+  const entries = Array.from(Array(1000)).map((_, i) => ({
+    op: "put" as const,
+    key: `${i}`,
+    value: { id: i, text: `Todo ${i} ${Date.now()}`, completed: false },
+  }));
 
-      return Promise.all([
-        getChangedEntries(executor, requestCookie ?? 0),
-        getChangedLastMutationIDs(executor, clientGroupID, requestCookie ?? 0),
-        getGlobalVersion(executor),
-      ]);
-    }
-  );
-
-  console.log("lastMutationIDChanges: ", lastMutationIDChanges);
-  console.log("responseCookie: ", responseCookie);
   console.log("Read all objects in", Date.now() - t0);
 
   // TODO: Return ClientStateNotFound for Replicache 13 to handle case where
   // server state deleted.
 
   const res: PullResponse = {
-    lastMutationIDChanges,
-    cookie: responseCookie,
-    patch: [],
+    lastMutationIDChanges: {},
+    cookie: (requestCookie || 0) + 1,
+    patch: entries,
   };
 
-  for (const [key, value, deleted] of entries) {
-    if (deleted) {
-      res.patch.push({
-        op: "del",
-        key,
-      });
-    } else {
-      res.patch.push({
-        op: "put",
-        key,
-        value,
-      });
-    }
-  }
 
-  console.log(`Returning`, JSON.stringify(res, null, ""));
   return res;
 }

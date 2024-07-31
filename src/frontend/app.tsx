@@ -15,8 +15,8 @@ import { useRep } from "pages/layout";
 const App = () => {
   // Subscribe to all todos and sort them.
   const rep = useRep()
-  const todos = useSubscribe(rep, listTodos, { default: undefined });
-  (todos || []) .sort((a, b) => a.sort - b.sort);
+  const todos = useSubscribe(rep, listTodos, { default: undefined })?.slice(0, 10)
+
 
   // Define event handlers and connect them to Replicache mutators. Each
   // of these mutators runs immediately (optimistically) locally, then runs

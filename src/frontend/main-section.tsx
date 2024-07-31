@@ -21,18 +21,7 @@ const MainSection = ({
 
   const [filter, setFilter] = useState("All");
 
-  const filteredTodos = todos.filter((todo) => {
-    if (filter === "All") {
-      return true;
-    }
-    if (filter === "Active") {
-      return !todo.completed;
-    }
-    if (filter === "Completed") {
-      return todo.completed;
-    }
-    throw new Error("Unknown filter: " + filter);
-  });
+  const filteredTodos = todos
 
   const handleCompleteAll = () => {
     const completed = !toggleAllValue;
